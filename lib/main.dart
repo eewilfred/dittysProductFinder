@@ -1,156 +1,145 @@
+
 import 'package:flutter/material.dart';
-import 'package:untitled/SearchResultModel.dart';
-import 'package:untitled/SearchRequest.dart';
-import 'dart:html' as html;
+import 'SearchResultpage.dart';
 
 
+import 'package:flutter/material.dart';
 
-/// The base class for the different types of items the list can contain.
-abstract class ListItem {
-  /// The title line to show in a list item.
-  Widget buildTitle(BuildContext context);
+void main() {
+  runApp(Nav2App());
 }
 
-class ListViewHomeLayout extends StatefulWidget {
-
-  String unformatedItemsToSearch;
-  ListViewHomeLayout({
-    required this.unformatedItemsToSearch,
-  });
-
-  @override
-  ListViewHome createState() {
-    
-    return new ListViewHome(unformatedItemsToSearch);
-  }
-}
-class ListViewHome extends State<ListViewHomeLayout> {
-  late String unformatedItemsToSearch;
-
-  var searchMap = Map<String, List<Value>>();
-  List<String> searchItems = [
-  "WMN-WM65RXU	Samsung Wallmount WMN-WM65R for Flip2 65",
-  "DS-D5AW/Q	Hik Vision Wall-mounted Bracket, suitable for all models",
-  "920-004519	Logitech Wireless Combo MK270 - ARA (102) - 2.4GHZ - INTNL",
-  "920-004509	Logitech Wireless Combo MK270 - US INT'L - 2.4GHZ - INTNL",
-  "981-000512	Logitech Wireless Headset Mono H820e  - USB  - EMEA28 - WIRELESS MONO",
-  "210-1026P	Dell X Series Switches 210-1026P",
-  "ANC6AUPYL-10MT	Avalon Network Yellow Colour Patch Cords ANC6AUPYL-10MT",
-  "ANC6AUPYL-1MT	Avalon Network Yellow Colour Patch Cords ANC6AUPYL-1MT",
-  "ANC6AUPYL-2MT	Avalon Network Yellow Colour Patch Cords ANC6AUPYL-2MT",
-  "ANC6AUPYL-3MT	Avalon Network Yellow Colour Patch Cords ANC6AUPYL-3MT",
-  "ANC6AUPYL-5MT	Avalon Network Yellow Colour Patch Cords ANC6AUPYL-5MT"
-  ];
-
-  List<ListItem> listViewData = [];
-
-  final icons = [Icons.ac_unit, Icons.access_alarm, Icons.access_time];
-  var request = SearchRequest();
-  List<Value> _results = [];
-  ListViewHome(String unformatedItemsToSearch) {
-
-    this.unformatedItemsToSearch = unformatedItemsToSearch;
-    getSearchResults();
-  }
-
-  Future<void> getSearchResults() async {
-    for (var searchterm in searchItems) {
-      var results = await request.getResults(searchterm, "");
-      setState(() {
-        searchMap[searchterm] = results;
-        listViewData.add(
-          HeadingItem(searchterm)
-        );
-        for(var result in results) {
-          listViewData.add(
-              MessageItem(result)
-          );
-        }
-        listViewData.add(Spacer());
-      });
-    }
-  }
-
+class Nav2App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: listViewData.length ,
-        itemBuilder: (context, index) {
-          final item = listViewData[index];
-          return item.buildTitle(context);
-        });
-  }
-}
+    return MaterialApp(
+      onGenerateRoute: (settings) {
+        // Handle '/'
+        if (settings.name == '/') {
+          return MaterialPageRoute(builder: (context) => HomeScreen());
+        }
 
+        // Handle '/details/:id'
+        var uri = Uri.parse(settings.name!);
+        if (uri.pathSegments.length == 2 &&
+            uri.pathSegments.first == 'result') {
+          var id = uri.pathSegments[1];
+          return MaterialPageRoute(builder: (context) => ListViewHomeLayout(unformatedItemsToSearch: id) );
+        }
 
-
-/// A ListItem that contains data to display a heading.
-class HeadingItem implements ListItem {
-  final String heading;
-
-  HeadingItem(this.heading);
-
-  @override
-  Widget buildTitle(BuildContext context) {
-    var textStyle = TextStyle(
-      color: Colors.black,
-      fontSize: 25,
-      fontWeight: FontWeight.bold,
-      decoration: TextDecoration.underline,
-      decorationStyle: TextDecorationStyle.double,
-    );
-    return SelectableText(
-      heading,
-      style: textStyle,
-    );
-    return Text(
-      heading,
-      style: Theme.of(context).textTheme.headline5,
+        return MaterialPageRoute(builder: (context) => UnknownScreen());
+      },
     );
   }
 }
 
-/// A ListItem that contains data to display a message.
-class MessageItem implements ListItem {
+class HomeScreen extends StatelessWidget {
 
-  final Value result;
-
-  MessageItem(this.result);
-
+  final myController = TextEditingController();
   @override
-  Widget buildTitle(BuildContext context) {
-    return Card(
-      color: Colors.lightBlueAccent,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
         child: Column(
           children: [
-            ListTile(
-
-              title: SelectableText(result.title),
-              subtitle: SelectableText(result.description),
-            ),
+            TextField(
+              controller: myController,
+              decoration: InputDecoration(hintText: "Insert your message",),
+              scrollPadding: EdgeInsets.all(20.0),
+              keyboardType: TextInputType.multiline,
+              autofocus: true,),
             ElevatedButton(
               style: ElevatedButton.styleFrom(onSurface: Colors.red),
               onPressed: () {
-                print("\n\n\nURL:::" + result.url);
-                html.window.open(result.url,"_blank");
+                Navigator.pushNamed(
+                  context,
+                  '/result/' + myController.text,
+                );
               },
-              child: Text(result.url),
+              child: Text("Get Results"),
             )
+
           ],
         )
+      ),
     );
   }
 }
 
-class Spacer implements ListItem {
+class DetailScreen extends StatelessWidget {
+  String id;
+
+  DetailScreen({
+    required this.id,
+  });
 
   @override
-  Widget buildTitle(BuildContext context) {
-    return SizedBox(
-      height: 30,
-      child: ColoredBox(
-        color: Colors.white,
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Product Finder"),
+        ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Viewing details for item $id'),
+            FlatButton(
+              child: Text('Pop!'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class UnknownScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Text('404!'),
+      ),
+    );
+  }
+}
+
+class EntrypageLayout extends StatefulWidget {
+
+  @override
+  Entrypage createState() {
+
+    return new Entrypage();
+  }
+}
+class Entrypage extends State<EntrypageLayout> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Product Finder"),
+      ),
+      body: Center(
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: null,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
