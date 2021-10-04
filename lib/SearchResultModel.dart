@@ -23,15 +23,15 @@ class SearchResult {
   final List<Value> value;
 
   factory SearchResult.fromJson(Map<String, dynamic> json) => SearchResult(
-    didUMean: json["didUMean"] as String,
-    totalCount: json["totalCount"] == null ? null : json["totalCount"],
-    value: List<Value>.from(json["value"].map((x) => Value.fromJson(x))),
+    didUMean: json["didUMean"] == null && !(json["didUMean"] is String) ? "null" : json["didUMean"],
+    totalCount: json["totalCount"] == null && !(json["totalCount"] is int) ? 0 : json["totalCount"],
+    value: json["value"] == null ? [] : List<Value>.from(json["value"].map((x) => Value.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
-    "didUMean": didUMean == null ? null : didUMean,
-    "totalCount": totalCount == null ? null : totalCount,
-    "value": value == null ? null : List<dynamic>.from(value.map((x) => x.toJson())),
+    "didUMean": didUMean == null ? "null" : didUMean,
+    "totalCount": totalCount == null ? "null" : totalCount,
+    "value": value == null ? [] : List<dynamic>.from(value.map((x) => x.toJson())),
   };
 }
 
@@ -42,9 +42,6 @@ class Value {
     required this.url,
     required this.description,
     required this.body,
-    required this.snippet,
-    required this.language,
-    required this.isSafe,
   });
 
   final String id;
@@ -52,19 +49,14 @@ class Value {
   final String url;
   final String description;
   final String body;
-  final String snippet;
-  final String language;
-  final bool isSafe;
+
 
   factory Value.fromJson(Map<String, dynamic> json) => Value(
-    id: json["id"] == null ? null : json["id"],
-    title: json["title"] == null ? null : json["title"],
-    url: json["url"] == null ? null : json["url"],
-    description: json["description"] == null ? null : json["description"],
-    body: json["body"] == null ? null : json["body"],
-    snippet: json["snippet"] == null ? null : json["snippet"],
-    language: json["language"] == null ? null : json["language"],
-    isSafe: json["isSafe"] == null ? null : json["isSafe"],
+    id: json["id"] == null && !(json["id"] is String)  ? "" : json["id"],
+    title: json["title"] == null && !(json["title"] is String) ? "null" : json["title"],
+    url: json["url"] == null && !(json["url"] is String) ? null : json["url"],
+    description: json["description"] == null && !(json["description"] is String) ? 'null' : json["description"],
+    body: json["body"] == null && !(json["body"] is String) ? "null" : json["body"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -72,9 +64,6 @@ class Value {
     "title": title == null ? null : title,
     "url": url == null ? null : url,
     "description": description == null ? null : description,
-    "body": body == null ? null : body,
-    "snippet": snippet == null ? null : snippet,
-    "language": language == null ? null : language,
-    "isSafe": isSafe == null ? null : isSafe,
+    "body": body == null ? null : body
   };
 }
